@@ -1,0 +1,40 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.escolainsuficienciaespaco" description="Escolas com insuficiencia de espaço" prefix="" label="Escolas com insuficiencia de espaço" type="0">
+  <fields>
+    <field name="escola"
+           conteudo="int4"
+           description="Escola"
+           inivalue="0"
+           label="Escola"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Escola"
+           reference=""
+           ispk="t"
+           hassequence="f">
+    </field>
+    <field name="insuficiencia"
+           conteudo="bool"
+           description="Insuficiencia"
+           inivalue="0"
+           label="Insuficiencia"
+           size="1"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="0"
+           tipoobj="text"
+           labelrel="Insuficiencia"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>    
+  </fields>
+  <primarykey>
+    <fieldpk  name="escola"></fieldpk>
+  </primarykey>
+</table>

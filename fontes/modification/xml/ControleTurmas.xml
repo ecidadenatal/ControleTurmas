@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modification>
+  <name>ControleTurmas</name>
+  <id>ControleTurmas</id>
+  <ecidade-version>2.3.50</ecidade-version>
+  <file path='forms/db_frmsala.php'>
+    <operation>
+      <search regex="true"><![CDATA[(<\/table>\n*.*<input)]]></search>
+      <add><![CDATA[
+
+<!-- //inicio plugin ControleTurma  -->
+<?
+ $sSqlEscolaEspacoInsuficiente = "select 1 
+ 		                            from plugins.escolainsuficienciaespaco
+ 		                           where insuficiencia is true
+ 		                             and escola = ".db_getsession("DB_coddepto");
+ $rsEscolaEspacoInsuficiente = db_query($sSqlEscolaEspacoInsuficiente);
+ if (pg_num_rows($rsEscolaEspacoInsuficiente) > 0) {
+ 	
+ 	if (isset($ed16_i_codigo)) {
+ 	  $sSqlDadosSalaCapacidade = "select * 
+ 	                                from plugins.salacapacidade 
+ 	                               where sala = {$ed16_i_codigo}";
+ 	  $rsDadosSalaCapacidade = db_query($sSqlDadosSalaCapacidade);
+ 	  if (pg_num_rows($rsDadosSalaCapacidade) > 0) {
+ 	  	db_fieldsmemory($rsDadosSalaCapacidade, 0);
+ 	  	$insuficiente = "S";
+ 	  }
+ 	}
+?>
+   <tr id="insuficiencia" style="visibility:<?=$visible?>">
+    <td><b>Insuficiente de espaço:</b></td>
+    <td colspan="2">
+      <?
+       $aOpcoes = array('N'=>'NÃO','S'=>'SIM');
+       db_select("insuficiente", $aOpcoes, true,$db_opcao,"onchange='mostraCamposCapacidade()'");
+      ?>
+    </td>
+   </tr>
+   <tr id="capacidade_minima">
+     <td><b>Capacidade Mínima:</b></td>
+     <td colspan="2"><? db_input("minima", 10, 1, true,"text",$db_opcao) ?></td>
+   </tr>
+   <tr id="capacidade_maxima">
+     <td><b>Capacidade Máxima:</b></td>
+     <td colspan="2"><? db_input("maxima", 10, 1, true,"text",$db_opcao) ?></td>
+   </tr>
+<? 
+ } 
+?>
+ <!-- //fim plugin ControleTurma  -->      
+      
+$1
+]]>
+
+      </add>
+    </operation> 
+    <operation>
+      <search regex="true"><![CDATA[(<script>)]]></search>
+      <add><![CDATA[$1
+      
+//inicio plugin ControleTurma
+function mostraCamposCapacidade() {
+
+	if (document.form1.insuficiente.value == "S") {
+	  document.getElementById("capacidade_minima").style.visibility = "visible";
+	  document.getElementById("capacidade_maxima").style.visibility = "visible";      
+	} else {
+	  document.getElementById("capacidade_minima").style.visibility = "collapse";
+	  document.getElementById("capacidade_maxima").style.visibility = "collapse";
+	}	
+	
+}
+mostraCamposCapacidade();
+//fim plugin ControleTurma
+
+]]>
+      </add>
+    </operation> 
+    <operation>
+      <search regex="true"><![CDATA[(document.getElementById\(\"capacidade\"\).style.visibility\s*=\s*\"hidden\";)]]></search>
+      <add><![CDATA[$1
+   document.getElementById("insuficiencia").style.visibility = "collapse";]]>
+      </add>
+    </operation>  
+    <operation>
+      <search regex="true"><![CDATA[(document.getElementById\("capacidade"\).style.visibility\s*=\s*\"visible\";)]]></search>
+      <add><![CDATA[$1
+   document.getElementById("insuficiencia").style.visibility = "visible";]]>
+      </add>
+    </operation>                
+    <operation>
+      <search regex="true"><![CDATA[\$cliframe_alterar_excluir->sql\s*=\s*\$clsala->sql_query\(.*\);]]></search>
+      <add><![CDATA[$cliframe_alterar_excluir->sql = $clsala->sql_query("","*, case when exists (select 1 from plugins.salacapacidade where sala = ed16_i_codigo) then 'S' else 'N' end as insuficiencia","ed16_c_descr"," ed16_i_escola = $ed16_i_escola");]]>
+      </add>
+    </operation>
+    <operation>
+      <search regex="true"><![CDATA[\$cliframe_alterar_excluir->campos\s*=.*;]]></search>
+      <add><![CDATA[$cliframe_alterar_excluir->campos  ="ed16_i_codigo,ed16_c_descr,ed16_i_capacidade,ed16_f_metragem,ed16_i_calculoaluno,ed16_c_pertence,ed14_c_descr,insuficiencia";]]>
+      </add>
+    </operation>        
+  </file>
+  
+  <file path='edu1_sala001.php'>
+    <operation>
+      <search regex="true"><![CDATA[(new\s*cl_edu_parametros;)]]></search>
+      <add><![CDATA[$1
+      
+//inicio plugin ControleTurmas
+$oSalaCapacidade  = new cl_salacapacidade();
+//fim plugin ControleTurmas      
+
+      ]]>
+      </add>
+    </operation> 
+    <operation>
+      <search regex="true"><![CDATA[(\$clsala->incluir\(.*\);)]]></search>
+      <add><![CDATA[$1
+      
+  //inicio plugin ControleTurmas
+  if (isset($insuficiente) && $insuficiente == "S") {
+  	
+  	$oSalaCapacidade->sala = $clsala->ed16_i_codigo;
+  	$oSalaCapacidade->minima = $minima;
+  	$oSalaCapacidade->maxima = $maxima;
+  	$oSalaCapacidade->incluir($clsala->ed16_i_codigo);
+  	if ($oSalaCapacidade->erro_status == "0") {
+  		$clsala->erro_status = "0";
+  		$clsala->erro_msg = $oSalaCapacidade->erro_msg;
+  	}
+  	
+  }
+  //fim plugin ControleTurmas
+        
+      ]]>
+      </add>
+    </operation>    
+    <operation>
+      <search regex="true"><![CDATA[(\$clsala->alterar\(.*\);)]]></search>
+      <add><![CDATA[$1
+      
+  //inicio plugin ControleTurmas
+  $oSalaCapacidade->excluir($ed16_i_codigo);
+  if ($oSalaCapacidade->erro_status == "0") {
+  	$clsala->erro_status = "0";
+  	$clsala->erro_msg = $oSalaCapacidade->erro_msg;
+  }
+  
+  if (isset($insuficiente) && $insuficiente == "S") {
+  	 
+  	$oSalaCapacidade->sala = $ed16_i_codigo;
+  	$oSalaCapacidade->maxima = $maxima;
+  	$oSalaCapacidade->minima = $minima;
+  	$oSalaCapacidade->incluir($ed16_i_codigo);
+  	if ($oSalaCapacidade->erro_status == "0") {
+  		$clsala->erro_status = "0";
+  		$clsala->erro_msg = $oSalaCapacidade->erro_msg;
+  	}
+  	 
+  }
+  //fim plugin ControleTurmas
+      
+      ]]>
+      </add>
+    </operation>
+    <operation>
+      <search regex="true"><![CDATA[(\$clsala->excluir\(.*\);)]]></search>
+      <add><![CDATA[$1
+      
+    //inicio plugin ControleTurmas
+    $oSalaCapacidade->excluir($ed16_i_codigo);
+    if ($oSalaCapacidade->erro_status == "0") {
+    	$clsala->erro_status = "0";
+    	$clsala->erro_msg = $oSalaCapacidade->erro_msg;
+    }
+    //fim plugin ControleTurmas
+      
+      ]]>
+      </add>
+    </operation>            
+  </file> 
+  
+  <file path='func_serieidade.php'>
+    <operation>
+      <search regex="true"><![CDATA[(\$where\s*=.*;)]]></search>
+      <add><![CDATA[$1
+      
+   //inicio plugin ControleTurmas
+   if (isset($plugin_controleturmas)) {
+   	$where .= "and not exists (select 1 from plugins.etapacapacidade where etapa = ed11_i_codigo)";
+   }
+   //fim plugin ControleTurmas
+      
+      ]]>
+      </add>
+    </operation> 
+  </file>  
+  
+  <file path='edu1_turmaRPC.php'>
+    <operation>
+      <search regex="true"><![CDATA[(\$rsEtapaCenso\s*=\s*db_query\(.*\);)]]></search>
+      <add><![CDATA[
+      
+  //inicio plugin ControleTurmas
+  $sSqlEtapaCenso     = "select x.*,
+  		                        etapacapacidade.minima,
+  		                        etapacapacidade.maxima,
+  		                        (select count(*)
+                                  from ( select ed336_vagas as vagas, 
+                                                count(distinct ed60_i_codigo) as qtd_matriculas 
+                                           from turma 
+                                                inner join regencia                on regencia.ed59_i_turma                             = turma.ed57_i_codigo
+                                                inner join turmaturnoreferente     on turmaturnoreferente.ed336_turma                   = turma.ed57_i_codigo
+  		                                         left join matricula               on matricula.ed60_i_turma                            = turma.ed57_i_codigo
+  		                                                                          and ed60_c_situacao = 'MATRICULADO'
+                                          where ed57_i_escola = ".db_getsession('DB_coddepto')." 
+                                            and ed57_i_calendario = {$oPost->iCalendario} 
+                                            and ed59_i_serie = ed11_i_codigo 
+                                          group by ed336_vagas ) as dados_vagas_matriculados 
+                                 where vagas - qtd_matriculas > 0 ) qtd_turmas_com_vagas
+                           from ({$sSqlEtapaCenso}) as x 
+                                inner join plugins.etapacapacidade on etapa = ed11_i_codigo";
+  //fim plugin ControleTurmas
+        
+  $1]]>
+      </add>
+    </operation> 
+  </file>
+  
+  <file path='edu1_turma004.php'>
+    <operation>
+      <search regex="true"><![CDATA[(\$sql\s*=\s*\"\s*SELECT.*;)]]></search>
+      <add><![CDATA[
+      
+//inicio plugin ControleTurmas
+$sSqlSalaCapacidade = "select * 
+                         from plugins.salacapacidade
+                        where sala = {$sala}";
+$rsSalaCapacidade = db_query($sSqlSalaCapacidade);
+if (pg_num_rows($rsSalaCapacidade) > 0) {
+	
+	db_fieldsMemory($rsSalaCapacidade, 0);
+	echo "<script> 
+	        parent.document.form1.capacidade_maxima_dependencia.value = {$maxima};
+	        if (parent.document.form1.capacidade_maxima_dependencia) {
+	          parent.document.form1.vagasTurma.value = {$maxima};
+	          parent.document.form1.vagasDisponiveis.value = {$maxima} - parent.document.form1.alunosMatriculados.value;
+	        }
+	      </script>";
+	
+} else {
+  echo "<script> 
+         parent.document.form1.capacidade_maxima_dependencia.value = '';
+        </script>";
+}
+//fim plugin ControleTurmas
+
+]]>
+      </add>
+    </operation>
+  </file>   
+  
+  <file path='forms/db_frmturma.php'>
+    <operation>
+      <search regex="true"><![CDATA[(\<form\s*name=\"form1\".*\>)]]></search>
+      <add><![CDATA[$1  
+  <input type="hidden" name="capacidade_maxima_etapa" id="capacidade_maxima_etapa" > 
+  <input type="hidden" name="capacidade_maxima_dependencia" id="capacidade_maxima_dependencia" >
+      ]]>
+      </add>
+    </operation>
+    <operation>
+      <search regex="true"><![CDATA[(if\s*\(\$clturmaserieregimemat-\>numrows\s*==\s*1\)\s*\{)]]></search>
+      <add><![CDATA[
+      
+              //inicio plugin ControleTurmas
+              $sSqlEtapaCapacidade = "select * 
+ 		                                from plugins.etapacapacidade
+ 		                               where etapa = {$ed11_i_codigo}";
+              $rsEtapaCapacidade = db_query($sSqlEtapaCapacidade);
+              if (pg_num_rows($rsEtapaCapacidade) > 0) {
+              	$oDadosEtapaCapacidade = db_utils::fieldsMemory($rsEtapaCapacidade, 0);
+                echo "<script> document.form1.capacidade_maxima_etapa.value = {$oDadosEtapaCapacidade->maxima}; </script>";
+              }
+              
+              $sSqlSalaCapacidade = "select * 
+ 		                               from plugins.salacapacidade
+ 		                              where sala = {$ed57_i_sala}";
+              $rsSalaCapacidade = db_query($sSqlSalaCapacidade);
+              if (pg_num_rows($rsSalaCapacidade) > 0) {
+              	$oDadosSalaCapacidade = db_utils::fieldsMemory($rsSalaCapacidade, 0);
+                echo "<script> document.form1.capacidade_maxima_dependencia.value = {$oDadosSalaCapacidade->maxima}; </script>";
+              }
+              //fim plugin ControleTurmas
+                    
+              $1]]>
+      </add>
+    </operation>
+    <operation>
+      <search regex="true"><![CDATA[(var\s*lBaseAtiva\s*=\s*true;)]]></search>
+      <add><![CDATA[$1
+      
+    //inicio plugin ControleTurmas
+    if (document.form1.ed57_i_calendario.value == "") {
+        alert("Informe o Calendário");
+        document.form1.ed57_i_base.value = "";
+        return false;
+    }
+    //fim plugin ControleTurmas
+
+      ]]>
+      </add>
+    </operation>
+    <operation>
+      <search regex="true"><![CDATA[(function\s*js_pesquisaed57_i_sala\(mostra\)\s*\{)]]></search>
+      <add><![CDATA[$1
+      
+    //inicio plugin ControleTurmas
+	<? if ($db_opcao == 1) { ?>
+      if (!document.form1.etapa) {
+          alert("Informe uma Base Curricular e alguma etapa!");
+          return false;        
+      } else {    
+      
+        var iQtdEtapas = document.form1.etapa.length;
+        if (iQtdEtapas == undefined) {
+        	iQtdEtapas = 1;
+        }    
+        
+        var iCapacidadeMaximaEtapa = 0;
+        var iEtapasSelecionadas    = 0;
+        for (iEtapa = 0; iEtapa < iQtdEtapas; iEtapa++) {
+            
+           if (document.getElementById("etapa"+iEtapa).checked == true) {
+        
+        	   iEtapasSelecionadas++;
+        	   iCodigoEtapa           = document.getElementById("etapa"+iEtapa).value;
+        	   iCapacidadeMaximaEtapa = document.getElementById("capacidade_maxima_"+iCodigoEtapa).value;
+        	   
+        	   document.form1.capacidade_maxima_etapa.value = iCapacidadeMaximaEtapa;
+        	   
+           }    
+           
+        }
+        
+        if (iEtapasSelecionadas == 0) {
+          alert("Informe alguma etapa!");
+          return false; 
+        }
+        
+      }
+    <? } ?>    
+    //fim plugin ControleTurmas]]>
+      </add>
+    </operation>
+    <operation>
+      <search regex="true"><![CDATA[(db_iframe_sala.hide\(\);)]]></search>
+      <add><![CDATA[$1
+      
+    //inicio plugin ControleTurmas
+    if (document.form1.capacidade_maxima_dependencia.value != "") {
+      $('iVagasSala').value = document.form1.capacidade_maxima_dependencia.value;
+    } else {    
+      $('iVagasSala').value = document.form1.capacidade_maxima_etapa.value;
+    }  
+    //fim plugin ControleTurmas
+      
+      ]]>
+      </add>
+    </operation>
+    <operation>
+      <search regex="true" flag="U"><![CDATA[sHtml\s*\+.*\<input\s*type=\"checkbox\".*id=\"etapa\'\+\s*i\s*\+\'((\n*.*)*)<\/label>.*;]]></search>
+      <add><![CDATA[
+      
+          //inicio plugin ControleTurmas
+          sHtml += '  <input type="hidden" name="capacidade_maxima_'+ed223_i_codigo+'" id="capacidade_maxima_'+ed223_i_codigo+'" value="'+maxima.urlDecode()+'">';
+          sHtml += '  <input type="hidden" name="capacidade_minima_'+ed223_i_codigo+'" id="capacidade_minima_'+ed223_i_codigo+'" value="'+minima.urlDecode()+'">';
+          sHtml += '  <input type="hidden" name="qtd_turmas_com_vagas_'+ed223_i_codigo+'" id="qtd_turmas_com_vagas_'+ed223_i_codigo+'" value="'+qtd_turmas_com_vagas.urlDecode()+'">';
+          sHtml += '  <input type="hidden" name="descr_etapa_'+ed223_i_codigo+'" id="descricao_etapa_'+ed223_i_codigo+'" value="'+ed11_c_descr.urlDecode()+'">';
+          
+          sHtml += '  <input type="checkbox" name="etapa" id="etapa'+ i +'" ';
+          sHtml += '         value="'+ed223_i_codigo+'" '+clique+' onchange="verificaEtapaCapacidade(this)"> ';
+          
+          sHtml += '  <label for="etapa'+ i +'">'+ed11_c_descr.urlDecode()+'</label>';
+          //fim plugin ControleTurmas
+                
+      ]]>
+      </add>
+    </operation>
+    <operation>
+      <search regex="true"><![CDATA[(function js_validacaoInc\(\)\s*\{)]]></search>
+      <add><![CDATA[
+
+ //inicio ControleTurmas
+  function verificaEtapaCapacidade(oEtapa) {
+
+	var iQtdEtapas = document.form1.etapa.length;
+    if (iQtdEtapas == undefined) {
+    	iQtdEtapas = 1;
+    }
+	var iCapacidadeMaximaEtapa  = 0;
+    var iEtapasSelecionadas     = 0;
+    var iQtdTotalTurmasComVagas = 0;
+    for (iEtapa = 0; iEtapa < iQtdEtapas; iEtapa++) {
+        
+       if (document.getElementById("etapa"+iEtapa).checked == true) {
+    
+    	   iEtapasSelecionadas++;
+
+    	   iCodigoEtapa            = document.getElementById("etapa"+iEtapa).value;
+    	   iCapacidadeMinimaEtapa  = document.getElementById("capacidade_minima_"+iCodigoEtapa).value;
+    	   iCapacidadeMaximaEtapa  = document.getElementById("capacidade_maxima_"+iCodigoEtapa).value;
+    	   iQtdTurmasComVagasEtapa = document.getElementById("qtd_turmas_com_vagas_"+iCodigoEtapa).value;
+    	      
+    	   document.form1.capacidade_maxima_etapa.value = iCapacidadeMaximaEtapa;
+    	   if (document.form1.vagasTurma) {
+        	if (document.form1.capacidade_maxima_dependencia.value != "") {
+        	  document.form1.vagasTurma.value = document.form1.capacidade_maxima_dependencia.value;
+        	} else {   
+    	   	  document.form1.vagasTurma.value = iCapacidadeMaximaEtapa;
+        	}
+    	   }
+           
+    	   if (iQtdTurmasComVagasEtapa > 0) {
+    		   sDescricaoEtapa         = document.getElementById("descricao_etapa_"+iCodigoEtapa).value;
+    		   iQtdTotalTurmasComVagas++;
+    	   }    	   
+    	   
+       }    
+       
+    }
+
+    if (iQtdTotalTurmasComVagas > 0) {
+      alert("Operação não permitida!\nEtapa "+sDescricaoEtapa+" possui turmas com vagas em aberto para o calendário selecionado.");
+      document.form1.db_opcao.disabled = true;
+    } else {
+      document.form1.db_opcao.disabled = false;
+    }
+	          
+  }
+  //fim ControleTurmas
+      
+ $1]]>
+      </add>
+    </operation>
+    <operation>
+      <search regex="true"><![CDATA[(var\s*oLabelDisponivel.*;)]]></search>
+      <add><![CDATA[$1
+      
+    //inicio plugin ControleTurmas
+    iVagasSala = document.form1.capacidade_maxima_etapa.value;
+    if (document.form1.capacidade_maxima_dependencia.value != "") {
+      iVagasSala = document.form1.capacidade_maxima_dependencia.value;
+    }
+    //fim plugin ControleTurmas
+]]>
+      </add>
+    </operation>    
+    <operation>
+      <search regex="true"><![CDATA[("class" : "vagasTurma")]]></search>
+      <add><![CDATA["class" : "vagasTurma", "readonly":"readonly", "style":"background-color:#DEB887;"]]>
+      </add>
+    </operation>
+    <operation>
+      <search regex="true"><![CDATA[(\$\('iVagasSala'\).value\s*=\s*chave3;)]]></search>
+      <add><![CDATA[$1
+    //inicio plugin ControleTurmas  
+    document.form1.capacidade_maxima_dependencia.value = '';
+    //fim plugin ControleTurmas
+]]>
+      </add>
+    </operation>    
+  </file>    
+</modification>

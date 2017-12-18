@@ -1,0 +1,56 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.salacapacidade" description="Capacidade da Sala" prefix="" label="Capacidade da sala" type="0">
+  <fields>
+    <field name="sala"
+           conteudo="int4"
+           description="Sala"
+           inivalue="0"
+           label="Sala"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Sala"
+           reference=""
+           ispk="t"
+           hassequence="f">
+    </field>
+    <field name="minima"
+           conteudo="int4"
+           description="Capacidade Minima"
+           inivalue="0"
+           label="Capacidade Minima"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Capacidade Minima"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="maxima"
+           conteudo="int4"
+           description="Capacidade Maxima"
+           inivalue="0"
+           label="Capacidade Maxima"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Capacidade Maxima"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>        
+  </fields>
+  <primarykey>
+    <fieldpk  name="sala"></fieldpk>
+  </primarykey>
+</table>

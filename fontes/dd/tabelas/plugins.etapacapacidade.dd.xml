@@ -1,0 +1,56 @@
+<?xml version="1.0" standalone="yes" ?>
+<table name="plugins.etapacapacidade" description="Cadastro da capacidade de matriculas para a etapa" prefix="" label="Cadastro da capacidade de matriculas para a etapa" type="0">
+  <fields>
+    <field name="etapa"
+           conteudo="int4"
+           description="Etapa"
+           inivalue="0"
+           label="Etapa"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Etapa"
+           reference=""
+           ispk="t"
+           hassequence="f">
+    </field>
+    <field name="minima"
+           conteudo="int4"
+           description="Minima"
+           inivalue="0"
+           label="Minima"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Minima"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field>
+    <field name="maxima"
+           conteudo="int4"
+           description="Maxima"
+           inivalue="0"
+           label="Maxima"
+           size="10"
+           null="f"
+           uppercase="f"
+           autocompl="f"
+           aceitatipo="1"
+           tipoobj="text"
+           labelrel="Maxima"
+           reference=""
+           ispk="f"
+           hassequence="f">
+    </field> 
+  </fields>
+  <primarykey>
+    <fieldpk  name="etapa"></fieldpk>
+  </primarykey>
+</table>

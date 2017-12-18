@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <plugin name="ControleTurmas" label="Controle do cadastro de turmas" plugin-version="1.0" ecidade-version="2.3.50" id-modulo="7159">
+   <id id="ControleTurmas"> </id>
+   	<files>    
+	    
+	    <file name="edu1_etapacapacidade001.php"              path="/edu1_etapacapacidade001.php" />
+	    <file name="sec4_escolainsuficienciaespaco001.php"    path="/sec4_escolainsuficienciaespaco001.php" />
+	    
+	    <file name="db_escolainsuficienciaespaco_classe.php"  path="/classes/db_escolainsuficienciaespaco_classe.php" />
+	    <file name="db_etapacapacidade_classe.php"            path="/classes/db_etapacapacidade_classe.php" />
+	    <file name="db_salacapacidade_classe.php"             path="/classes/db_salacapacidade_classe.php" />
+	    
+	    <file name="plugins.escolainsuficienciaespaco.dd.xml" path="/dd/tabelas/plugins.escolainsuficienciaespaco.dd.xml" />
+	    <file name="plugins.etapacapacidade.dd.xml"           path="/dd/tabelas/plugins.etapacapacidade.dd.xml" />
+	    <file name="plugins.salacapacidade.dd.xml"            path="/dd/tabelas/plugins.salacapacidade.dd.xml" />
+	    
+	    <file name="ControleTurmas.xml"    path="/modification/xml/ControleTurmas.xml" />
+   	</files>
+   	<estrutura install="/instalacao.sql" uninstall="/desinstalacao.sql">
+    </estrutura>
+  </plugin>
+</manifest>    
+
+
